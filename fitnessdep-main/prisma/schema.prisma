@@ -1,0 +1,167 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String         @id @default(uuid())
+  email           String         @unique
+  passwordHash    String
+  name            String
+  avatar          String?
+  gender          String?
+  age             Int?
+  weight          Float?
+  height          Float?
+  targetWeight    Float?
+  xp              Int            @default(0)
+  coins           Int            @default(0)
+  level           Int            @default(1)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  workouts        Workout[]
+  meals           Meal[]
+  waterIntakes    WaterIntake[]
+  sleepLogs       SleepLog[]
+  heartRates      HeartRate[]
+  goals           Goal[]
+  achievements    UserAchievement[]
+  chats           AIChatHistory[]
+  notifications   Notification[]
+  settings        Settings?
+}
+
+model Workout {
+  id              String         @id @default(uuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category        String         // Strength, Cardio, Yoga, HIIT, Pilates, etc.
+  date            DateTime       @default(now())
+  durationMinutes Int
+  caloriesBurned  Int
+  exercises       Exercise[]
+}
+
+model Exercise {
+  id         String   @id @default(uuid())
+  workoutId  String
+  workout    Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  name       String
+  sets       Set[]
+}
+
+model Set {
+  id          String   @id @default(uuid())
+  exerciseId  String
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  reps        Int
+  weight      Float
+  completed   Boolean  @default(false)
+}
+
+model Meal {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name           String
+  category       String   // Breakfast, Lunch, Dinner, Snacks
+  calories       Float
+  protein        Float
+  carbs          Float
+  fat            Float
+  sugar          Float
+  fiber          Float
+  createdAt      DateTime @default(now())
+}
+
+model WaterIntake {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amountMl  Int
+  createdAt DateTime @default(now())
+}
+
+model SleepLog {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hours     Float
+  createdAt DateTime @default(now())
+}
+
+model HeartRate {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bpm       Int
+  createdAt DateTime @default(now())
+}
+
+model Goal {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  category  String   // weight, workout, water, steps, diet
+  target    Float
+  current   Float
+  unit      String
+  completed Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+}
+
+model Achievement {
+  id          String            @id @default(uuid())
+  title       String            @unique
+  description String
+  badgeIcon   String            // name of icon
+  xpReward    Int
+  users       UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  unlockedAt    DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+}
+
+model AIChatHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sender    String   // user or coach
+  text      String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  text      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Settings {
+  id                String  @id @default(uuid())
+  userId            String  @unique
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme             String  @default("dark")
+  notificationsOn   Boolean @default(true)
+  units             String  @default("metric") // metric or imperial
+  language          String  @default("en")
+  voiceCoachEnabled Boolean @default(true)
+}
