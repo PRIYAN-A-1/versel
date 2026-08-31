@@ -1,7 +1,11 @@
 {
-  "dependencies": {
-    "next": "^14.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+  "name": "versel",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix fitnessdep-main run dev",
+    "build": "npm --prefix fitnessdep-main run build",
+    "start": "npm --prefix fitnessdep-main run start",
+    "lint": "npm --prefix fitnessdep-main run lint",
+    "vercel-build": "npm --prefix fitnessdep-main install && npm --prefix fitnessdep-main run build"
   }
 }
